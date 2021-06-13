@@ -17,6 +17,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #include <inttypes.h>
 #include <sys/ioctl.h>
@@ -28,7 +29,7 @@
 /* definitions */
 
 #define DESTZONE "TZ=Europe/Berlin"
-#define OUTPUT_FORMAT = "normal" // Set to "json" for format expected by the homebridge-bm680 plugin.
+#define OUTPUT_FORMAT "json" // Set to "json" for format expected by the homebridge-bm680 plugin.
 #define temp_offset (5.0f)
 #define sample_rate_mode (BSEC_SAMPLE_RATE_LP)
 
@@ -198,7 +199,7 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy,
    */
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
-  if (OUTPUT_FORMAT == "json") { // print output in format required for homebridge-bme680
+  if (strcasecmp(OUTPUT_FORMAT,"json") == 0) { // print output in format required for homebridge-bme680
     printf("{\"timestamp\":\"%d-%02d-%02d %02d:%02d:%02d\",", tm.tm_year + 1900,tm.tm_mon + 1,
         tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec); /* localtime */
     printf("\"iaq\":%.2f, \"iaq_accuracy\":%d,", iaq, iaq_accuracy);
