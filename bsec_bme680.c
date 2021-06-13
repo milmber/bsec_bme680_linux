@@ -28,6 +28,7 @@
 /* definitions */
 
 #define DESTZONE "TZ=Europe/Berlin"
+#define OUTPUT_FORMAT = "normal" // Set to "json" for format expected by the homebridge-bm680 plugin.
 #define temp_offset (5.0f)
 #define sample_rate_mode (BSEC_SAMPLE_RATE_LP)
 
@@ -197,20 +198,34 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy,
    */
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
-
-  printf("%d-%02d-%02d %02d:%02d:%02d,", tm.tm_year + 1900,tm.tm_mon + 1,
-         tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec); /* localtime */
-  printf("[IAQ (%d)]: %.2f", iaq_accuracy, iaq);
-  printf(",[T degC]: %.2f,[H %%rH]: %.2f,[P hPa]: %.2f", temperature,
-         humidity,pressure / 100);
-  printf(",[G Ohms]: %.0f", gas);
-  printf(",[S]: %d", bsec_status);
-  //printf(",[static IAQ]: %.2f", static_iaq);
-  printf(",[eCO2 ppm]: %.15f", co2_equivalent);
-  printf(",[bVOCe ppm]: %.25f", breath_voc_equivalent);
-  //printf(",%" PRId64, timestamp);
-  //printf(",%" PRId64, timestamp_ms);
-  printf("\r\n");
+  if (OUTPUT_FORMAT == "json") { // print output in format required for homebridge-bme680
+    printf("{\"timestamp\":\"%d-%02d-%02d %02d:%02d:%02d\",", tm.tm_year + 1900,tm.tm_mon + 1,
+        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec); /* localtime */
+    printf("\"iaq\":%.2f, \"iaq_accuracy\":%d,", iaq, iaq_accuracy);
+    printf("\"raw_temperature\":%.2f, \"raw_humidity\":%.2f,",
+        raw_temperature,
+        raw_humidity);
+    printf("\"temperature\":%.2f, \"humidity\":%.2f,", temperature, humidity);
+    printf(" \"pressure\":%.2f,", pressure / 100);
+    printf(" \"eCO2\":%.15f,", co2_equivalent);
+    printf(" \"bVOCe\":%.25f,", breath_voc_equivalent);
+    printf("\"gas_pressure\":%.0f, \"bsec_status\":%d }", gas, bsec_status);
+    printf("\r\n");
+  } else{
+    printf("%d-%02d-%02d %02d:%02d:%02d,", tm.tm_year + 1900,tm.tm_mon + 1,
+        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec); /* localtime */
+        printf("[IAQ (%d)]: %.2f", iaq_accuracy, iaq);
+        printf(",[T degC]: %.2f,[H %%rH]: %.2f,[P hPa]: %.2f", temperature,
+            humidity,pressure / 100);
+    printf(",[G Ohms]: %.0f", gas);
+    printf(",[S]: %d", bsec_status);
+    //printf(",[static IAQ]: %.2f", static_iaq);
+    printf(",[eCO2 ppm]: %.15f", co2_equivalent);
+    printf(",[bVOCe ppm]: %.25f", breath_voc_equivalent);
+    //printf(",%" PRId64, timestamp);
+    //printf(",%" PRId64, timestamp_ms);
+    printf("\r\n");
+  }
   fflush(stdout);
 }
 
